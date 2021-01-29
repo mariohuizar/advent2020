@@ -1,18 +1,21 @@
 import zio._
+import zio.console._
+
 import scala.io.Source
 
 object Day01 extends zio.App {
-
-  val readInput = Task.effect(Source.fromFile("advent2020/src/resources/Day01Input.txt").getLines.toList.map(_.toInt))
+  private val readInput = zio.blocking.effectBlocking {
+    val source = Source.fromFile("advent2020/src/resources/Day01Input.txt")
+    try source.getLines().toList.map(_.toInt) finally source.close()
+  }
 
   def find2020Sum(input: List[Int]): Int = {
-    def loop(input: List[Int], current: Int): Int  = {
+    def loop(input: List[Int], current: Int): Int = {
       input match {
         case x :: y :: xs =>
           val toFind = 2020 - current
           if (input.contains(toFind)) {
-            println(s"result: ${current * toFind}")
-            current + toFind
+            current * toFind // we found the answer!
           } else {
             loop(xs, y)
           }
@@ -26,6 +29,6 @@ object Day01 extends zio.App {
     }
   }
 
-  def run(args: List[String]) = readInput.map(find2020Sum).exitCode
+  def run(args: List[String]) =
+    readInput.map(find2020Sum).flatMap(r => putStrLn(r.toString)).exitCode
 }
-
